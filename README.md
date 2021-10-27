@@ -1,34 +1,32 @@
-**컨테이너 네트워크 이해를 위해**  **IP**  **명령어를 이용한 수동 구성**
+**컨테이너 네트워크 이해를 위해 IP 명령어를 이용한 수동 구성**
 
-1. **veth(virtual ethernet)****는 ****?**
+## 1. veth(virtual ethernet)
 
-veth는 리눅스의 버추얼 이더넷 인터페이스를 의미합니다. veth는 쌍으로 만들어지며 네트워크 네임스페이스들을 터널로서 연결하거나, 물리 디바이스와 다른 네트워크 네임스페이스의 장비를 연결하는 용도로 사용할 수 있습니다.
+veth는 리눅스의 버츄얼 이더넷 인터페이스를 의미합니다. veth는 쌍으로 만들어지며 네트워크 네임스페이스들을 터널로서 연결하거나, 물리 디바이스와 다른 네트워크 네임스페이스의 장비를 연결하는 용도로 사용할 수 있습니다.
 
-리눅스에서는 ip를 사용해 veth 타입의 가상 네트워크 장비를 생성할 수 있습니다. veth는 쌍으로 만들어지므로, \&lt;veth0\_name\&gt;과 \&lt;veth1\_name\&gt;을 적절한 이름으로 치환해줍니다.
+리눅스에서는 ip를 사용해 veth 타입의 가상 네트워크 장비를 생성할 수 있습니다. veth는 쌍으로 만들어지므로, \<veth0_name\>와 \<veth1_name\>을 적절한 이름으로 치환해줍니다.
 
-예) # ip link add \&lt;veth0\_name\&gt; type veth peer name \&lt;veth1\_name\&gt;
+예) # ip link add \<veth0_name\> type veth peer name \<veth1_name\>
 
-1. **구성**
 
-![](RackMultipart20211027-4-1h77eyw_html_a3dd42e9d691f3dc.png)
+## 2. 구성
+### 2.1 네트워크 네임스페이스
+veth라는 버츄얼 이더넷를 만든다
+<pre><code># ip link add veth0 type veth peer name veth1
+# ip link
+veth1@veth0: <BROADCAST,MULTICAST,M-DOWN> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether 72:d1:e3:44:82:60 brd ff:ff:ff:ff:ff:ff
+veth0@veth1: <BROADCAST,MULTICAST,M-DOWN> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether c6:62:6f:65:3c:c5 brd ff:ff:ff:ff:ff:ff
+</code></pre>
 
-**# ip link add veth0 type veth peer name veth1**
-
-**# ip link
-
-veth1@veth0: \&lt;BROADCAST,MULTICAST,M-DOWN\&gt; mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether 72:d1:e3:44:82:60 brd ff:ff:ff:ff:ff:ff
-
-veth0@veth1: \&lt;BROADCAST,MULTICAST,M-DOWN\&gt; mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether c6:62:6f:65:3c:c5 brd ff:ff:ff:ff:ff:ff
-
-**# ip netns add vnet0** // vnet0라는 네트워크 네임스페이스를 만든다
-
-**# ip netns
-
+vnet0라는 네트워크 네임스페이스를 만든다
+<pre><code># ip netns add vnet0
+# ip netns
 vnet0
+</code></pre>
 
-**# ip link set veth1 netns vnet0** // veth1 디바이스를 네임스페이스 vnet0로 이동한다.
-
-**# ip link //veth1 디바이스가 안보이고, veth0 상태는 down이다
+veth1 디바이스를 네임스페이스 vnet0로 이동한다.
+<pre><code># ip link set veth1 netns vnet0
+# ip link // veth1 디바이스가 안보이고, veth0 상태는 down이다
 
 veth0@ … _ **state DOWN** _ …
 
